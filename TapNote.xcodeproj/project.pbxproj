@@ -1,0 +1,714 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		016C065420D16D59A18D174C /* AudioFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBE8D9D758E1715745CCC1A /* AudioFileStore.swift */; };
+		017C97B895F5854C8A4F0283 /* MemoLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A19BC9E941371A03A95E695 /* MemoLibraryStore.swift */; };
+		0207B244125EB34057A4E906 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932D13D98E7EF1B5C82DE8D3 /* SettingsView.swift */; };
+		0659F5BD326333CBFA5BC397 /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44CC0797D0DAAD2557723F /* AudioPlayerService.swift */; };
+		0C80595D7ABB8A8DE221AAC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AED0CF2109C55DAD8574062 /* Assets.xcassets */; };
+		187DD25B81E45C83E8A50DB1 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E74F1C8D0A52B65D31BA021D /* Formatters.swift */; };
+		1C322E5ECE897DBE716A31A1 /* TrimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58B5CB3CD140F63598DB611 /* TrimView.swift */; };
+		28472709891573FEF32A202C /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A16AD85F663F7A733E2A89 /* TranscriptionService.swift */; };
+		2C50912D8DF068B6C4C3CED7 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113CCEF7DA8DDEA86B8FA3EF /* KeychainHelper.swift */; };
+		39EDB6EDA55E3971E54342AE /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44CC0797D0DAAD2557723F /* AudioPlayerService.swift */; };
+		3B8ED9BF55E0F2805A4DBACC /* MemoRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E4BBFC6D1E69733984050 /* MemoRecording.swift */; };
+		3FDEEE5C3FE657AAEE018032 /* MemoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDB2AFF2068A577F0E6B150 /* MemoDetailView.swift */; };
+		436FDAEE98284E6D4B848CF6 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A16AD85F663F7A733E2A89 /* TranscriptionService.swift */; };
+		437DDA7C899D6E6221E49067 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38EA841DB5076EBB9D14C7E /* RecordView.swift */; };
+		45109F21A7E3575168C343FA /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */; };
+		4590AAB7CEE7E6916FA966E2 /* SummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7715C1F82B5223EB85BDA /* SummaryService.swift */; };
+		4A527365A58CD5729D1F395B /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF26E1257DB46B6F97E2B6AC /* WatchBridge.swift */; };
+		528284798C1824158B285698 /* TapNoteWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 709FC35A43418BA12EEE3EC6 /* TapNoteWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		55B8277F7A48D00287FE80AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94107C76BF6A5F94465CE85 /* ContentView.swift */; };
+		55E33DCD62C99051A351AC47 /* MemoLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A19BC9E941371A03A95E695 /* MemoLibraryStore.swift */; };
+		6FF14BD1BF48FF01BA60767E /* OpenAICompatibleClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */; };
+		7073FF60CC4E5085B980CD2C /* OpenAICompatibleClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */; };
+		828E80CC7F26D19C48D84BB8 /* TapNoteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD571137B0BC4E84E887E835 /* TapNoteApp.swift */; };
+		9742069FF72B8F5A8B4810E1 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF26E1257DB46B6F97E2B6AC /* WatchBridge.swift */; };
+		A56B2273A9A8C5C9557EC00C /* ICloudDocumentSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE805F80EF3500178F1BB079 /* ICloudDocumentSync.swift */; };
+		CA0AB8E4FDCF5905C26615F8 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7EE0A93134D1869FEFE282 /* RecordingSession.swift */; };
+		CC920E11B1E2B930526AF149 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E74F1C8D0A52B65D31BA021D /* Formatters.swift */; };
+		CF4FE9271C780B9700A24980 /* RecordWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2D55ACAF64B80043D51EC5 /* RecordWatchView.swift */; };
+		D2BB826A7CBF3F5C0A6D3806 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7D09C68AF58819654F28543 /* Assets.xcassets */; };
+		D2D6FABACADDC91848766036 /* SummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7715C1F82B5223EB85BDA /* SummaryService.swift */; };
+		D505BDC94CB589E4B495E70B /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */; };
+		D7FA20421C4F90D75D8152B3 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7EE0A93134D1869FEFE282 /* RecordingSession.swift */; };
+		D9B5C1343B9FC914656B511F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 520A041B96948CC54E5DC7CB /* PrivacyInfo.xcprivacy */; };
+		DCAB30EF5EF1453D44BD1C07 /* MemoRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E4BBFC6D1E69733984050 /* MemoRecording.swift */; };
+		DF43D774DFA8564584961D8C /* TapNoteWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0006B4229D368C3D802C1D98 /* TapNoteWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E5CA829DDFF1FAA17C799686 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113CCEF7DA8DDEA86B8FA3EF /* KeychainHelper.swift */; };
+		E646DADD892E1A73E7572CBB /* TapNoteWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92CC23AA773DD096FA55A44 /* TapNoteWatchApp.swift */; };
+		E8D3AB79536738B46ED8274D /* AudioTrimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D564C9B2520CE470A84171 /* AudioTrimService.swift */; };
+		EA03B631FE3E648BA8E7762C /* WatchLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51ACEABE1FF385D88650234A /* WatchLibraryView.swift */; };
+		EC73CBF50869C31C82507157 /* AudioFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBE8D9D758E1715745CCC1A /* AudioFileStore.swift */; };
+		F25F314F82241400A5511108 /* ICloudDocumentSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE805F80EF3500178F1BB079 /* ICloudDocumentSync.swift */; };
+		F3B49EE460D30EB28746B456 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B71169B086F0ADEAA1357B14 /* LibraryView.swift */; };
+		FA69FAB2A8C6E3613EE32E65 /* TapNoteWatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A982FFF84F0A32C448EE03 /* TapNoteWatchWidgets.swift */; };
+		FF20670D4D584EEB11313E09 /* AudioTrimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D564C9B2520CE470A84171 /* AudioTrimService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7F363BFBB18762D20BA356E2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F919867D16058CF3E6CBA537 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84FDBC96F25B069BFEAE3404;
+			remoteInfo = TapNoteWatch;
+		};
+		AE98E9E80EC8D6E3F01C60AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F919867D16058CF3E6CBA537 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FFD934DD1DE9E87FB8323F13;
+			remoteInfo = TapNoteWatchWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B95B91328B43E8B10D6BB62D /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				528284798C1824158B285698 /* TapNoteWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB54671ABBF957EB05172886 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DF43D774DFA8564584961D8C /* TapNoteWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0006B4229D368C3D802C1D98 /* TapNoteWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TapNoteWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		02A982FFF84F0A32C448EE03 /* TapNoteWatchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapNoteWatchWidgets.swift; sourceTree = "<group>"; };
+		03F7715C1F82B5223EB85BDA /* SummaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryService.swift; sourceTree = "<group>"; };
+		076ECC4BF3CF1831FDD4A4D4 /* TapNote.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TapNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		113CCEF7DA8DDEA86B8FA3EF /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		1BDB2AFF2068A577F0E6B150 /* MemoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoDetailView.swift; sourceTree = "<group>"; };
+		1CBE8D9D758E1715745CCC1A /* AudioFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileStore.swift; sourceTree = "<group>"; };
+		23C146B6F7918219BB85C25B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		29C9FF94D35F70F5BF2DB1C4 /* TapNoteWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TapNoteWatch.entitlements; sourceTree = "<group>"; };
+		2B44CC0797D0DAAD2557723F /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
+		3AED0CF2109C55DAD8574062 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3B9E4BBFC6D1E69733984050 /* MemoRecording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoRecording.swift; sourceTree = "<group>"; };
+		3FBD5B1548ED2AD077A647C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		46D564C9B2520CE470A84171 /* AudioTrimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTrimService.swift; sourceTree = "<group>"; };
+		51ACEABE1FF385D88650234A /* WatchLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLibraryView.swift; sourceTree = "<group>"; };
+		520A041B96948CC54E5DC7CB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5E37EBBEC45CE7D2A26B286D /* TapNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TapNote.entitlements; sourceTree = "<group>"; };
+		6A19BC9E941371A03A95E695 /* MemoLibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoLibraryStore.swift; sourceTree = "<group>"; };
+		709FC35A43418BA12EEE3EC6 /* TapNoteWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TapNoteWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B7EE0A93134D1869FEFE282 /* RecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingSession.swift; sourceTree = "<group>"; };
+		932D13D98E7EF1B5C82DE8D3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		93A16AD85F663F7A733E2A89 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
+		AA2D55ACAF64B80043D51EC5 /* RecordWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordWatchView.swift; sourceTree = "<group>"; };
+		B3C7CF0129FB264672C971D0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B71169B086F0ADEAA1357B14 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		BD571137B0BC4E84E887E835 /* TapNoteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapNoteApp.swift; sourceTree = "<group>"; };
+		D38EA841DB5076EBB9D14C7E /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		DE805F80EF3500178F1BB079 /* ICloudDocumentSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudDocumentSync.swift; sourceTree = "<group>"; };
+		E74F1C8D0A52B65D31BA021D /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		E92CC23AA773DD096FA55A44 /* TapNoteWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapNoteWatchApp.swift; sourceTree = "<group>"; };
+		F58B5CB3CD140F63598DB611 /* TrimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrimView.swift; sourceTree = "<group>"; };
+		F7D09C68AF58819654F28543 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F94107C76BF6A5F94465CE85 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleClient.swift; sourceTree = "<group>"; };
+		FF26E1257DB46B6F97E2B6AC /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0DE8B0BFA3186C562F9E09F4 /* TapNoteWatchWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				23C146B6F7918219BB85C25B /* Info.plist */,
+				02A982FFF84F0A32C448EE03 /* TapNoteWatchWidgets.swift */,
+			);
+			path = TapNoteWatchWidgets;
+			sourceTree = "<group>";
+		};
+		49EB28AE9C64B2629CD2F122 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				E97AC665EF6BAF1D79F781C4 /* Models */,
+				B6109781DEDB6C32EA01A416 /* Services */,
+				ABA3B87E44538421B8FD801A /* Utilities */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		4C40F0B2253668A9A2F9DE22 /* TapNoteWatch */ = {
+			isa = PBXGroup;
+			children = (
+				F7D09C68AF58819654F28543 /* Assets.xcassets */,
+				B3C7CF0129FB264672C971D0 /* Info.plist */,
+				AA2D55ACAF64B80043D51EC5 /* RecordWatchView.swift */,
+				29C9FF94D35F70F5BF2DB1C4 /* TapNoteWatch.entitlements */,
+				E92CC23AA773DD096FA55A44 /* TapNoteWatchApp.swift */,
+				51ACEABE1FF385D88650234A /* WatchLibraryView.swift */,
+			);
+			path = TapNoteWatch;
+			sourceTree = "<group>";
+		};
+		8F20D7E84031746286521C2A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				076ECC4BF3CF1831FDD4A4D4 /* TapNote.app */,
+				709FC35A43418BA12EEE3EC6 /* TapNoteWatch.app */,
+				0006B4229D368C3D802C1D98 /* TapNoteWatchWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A30E68321FBFDB68D57517C4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B71169B086F0ADEAA1357B14 /* LibraryView.swift */,
+				1BDB2AFF2068A577F0E6B150 /* MemoDetailView.swift */,
+				D38EA841DB5076EBB9D14C7E /* RecordView.swift */,
+				932D13D98E7EF1B5C82DE8D3 /* SettingsView.swift */,
+				F58B5CB3CD140F63598DB611 /* TrimView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		ABA3B87E44538421B8FD801A /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E74F1C8D0A52B65D31BA021D /* Formatters.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		B5813730D87429E4BB0D32D1 = {
+			isa = PBXGroup;
+			children = (
+				49EB28AE9C64B2629CD2F122 /* Shared */,
+				BC8426EDC3DA7485698DB7AA /* TapNote */,
+				4C40F0B2253668A9A2F9DE22 /* TapNoteWatch */,
+				0DE8B0BFA3186C562F9E09F4 /* TapNoteWatchWidgets */,
+				8F20D7E84031746286521C2A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B6109781DEDB6C32EA01A416 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */,
+				1CBE8D9D758E1715745CCC1A /* AudioFileStore.swift */,
+				2B44CC0797D0DAAD2557723F /* AudioPlayerService.swift */,
+				46D564C9B2520CE470A84171 /* AudioTrimService.swift */,
+				DE805F80EF3500178F1BB079 /* ICloudDocumentSync.swift */,
+				113CCEF7DA8DDEA86B8FA3EF /* KeychainHelper.swift */,
+				6A19BC9E941371A03A95E695 /* MemoLibraryStore.swift */,
+				FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */,
+				8B7EE0A93134D1869FEFE282 /* RecordingSession.swift */,
+				03F7715C1F82B5223EB85BDA /* SummaryService.swift */,
+				93A16AD85F663F7A733E2A89 /* TranscriptionService.swift */,
+				FF26E1257DB46B6F97E2B6AC /* WatchBridge.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BC8426EDC3DA7485698DB7AA /* TapNote */ = {
+			isa = PBXGroup;
+			children = (
+				A30E68321FBFDB68D57517C4 /* Views */,
+				3AED0CF2109C55DAD8574062 /* Assets.xcassets */,
+				F94107C76BF6A5F94465CE85 /* ContentView.swift */,
+				3FBD5B1548ED2AD077A647C9 /* Info.plist */,
+				520A041B96948CC54E5DC7CB /* PrivacyInfo.xcprivacy */,
+				5E37EBBEC45CE7D2A26B286D /* TapNote.entitlements */,
+				BD571137B0BC4E84E887E835 /* TapNoteApp.swift */,
+			);
+			path = TapNote;
+			sourceTree = "<group>";
+		};
+		E97AC665EF6BAF1D79F781C4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3B9E4BBFC6D1E69733984050 /* MemoRecording.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		84FDBC96F25B069BFEAE3404 /* TapNoteWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0D02088BD05322746DD0E4E4 /* Build configuration list for PBXNativeTarget "TapNoteWatch" */;
+			buildPhases = (
+				58EB3DCED092B9551227FD99 /* Sources */,
+				90D8CAB37E01A9DD012653A8 /* Resources */,
+				EB54671ABBF957EB05172886 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E431E754ACF7353D3E7914D6 /* PBXTargetDependency */,
+			);
+			name = TapNoteWatch;
+			packageProductDependencies = (
+			);
+			productName = TapNoteWatch;
+			productReference = 709FC35A43418BA12EEE3EC6 /* TapNoteWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B0A5F71901436856D14F6DD0 /* TapNote */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 703B7A67672FEF2675586B9E /* Build configuration list for PBXNativeTarget "TapNote" */;
+			buildPhases = (
+				0FDDA3081D8AA95A9D567384 /* Sources */,
+				F95B271A6920E29E2C90B7A2 /* Resources */,
+				B95B91328B43E8B10D6BB62D /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B53D093CEB7711470194610A /* PBXTargetDependency */,
+			);
+			name = TapNote;
+			packageProductDependencies = (
+			);
+			productName = TapNote;
+			productReference = 076ECC4BF3CF1831FDD4A4D4 /* TapNote.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FFD934DD1DE9E87FB8323F13 /* TapNoteWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3237B0F23401D5A467FFFD4F /* Build configuration list for PBXNativeTarget "TapNoteWatchWidgets" */;
+			buildPhases = (
+				E038024AD2FAB6B4A10F3883 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TapNoteWatchWidgets;
+			packageProductDependencies = (
+			);
+			productName = TapNoteWatchWidgets;
+			productReference = 0006B4229D368C3D802C1D98 /* TapNoteWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F919867D16058CF3E6CBA537 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					84FDBC96F25B069BFEAE3404 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					B0A5F71901436856D14F6DD0 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					FFD934DD1DE9E87FB8323F13 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = E654905BFC9DD663503483DD /* Build configuration list for PBXProject "TapNote" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B5813730D87429E4BB0D32D1;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8F20D7E84031746286521C2A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B0A5F71901436856D14F6DD0 /* TapNote */,
+				84FDBC96F25B069BFEAE3404 /* TapNoteWatch */,
+				FFD934DD1DE9E87FB8323F13 /* TapNoteWatchWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		90D8CAB37E01A9DD012653A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2BB826A7CBF3F5C0A6D3806 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F95B271A6920E29E2C90B7A2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0C80595D7ABB8A8DE221AAC1 /* Assets.xcassets in Resources */,
+				D9B5C1343B9FC914656B511F /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0FDDA3081D8AA95A9D567384 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				45109F21A7E3575168C343FA /* AppLogger.swift in Sources */,
+				EC73CBF50869C31C82507157 /* AudioFileStore.swift in Sources */,
+				0659F5BD326333CBFA5BC397 /* AudioPlayerService.swift in Sources */,
+				E8D3AB79536738B46ED8274D /* AudioTrimService.swift in Sources */,
+				55B8277F7A48D00287FE80AF /* ContentView.swift in Sources */,
+				CC920E11B1E2B930526AF149 /* Formatters.swift in Sources */,
+				F25F314F82241400A5511108 /* ICloudDocumentSync.swift in Sources */,
+				E5CA829DDFF1FAA17C799686 /* KeychainHelper.swift in Sources */,
+				F3B49EE460D30EB28746B456 /* LibraryView.swift in Sources */,
+				3FDEEE5C3FE657AAEE018032 /* MemoDetailView.swift in Sources */,
+				55E33DCD62C99051A351AC47 /* MemoLibraryStore.swift in Sources */,
+				3B8ED9BF55E0F2805A4DBACC /* MemoRecording.swift in Sources */,
+				7073FF60CC4E5085B980CD2C /* OpenAICompatibleClient.swift in Sources */,
+				437DDA7C899D6E6221E49067 /* RecordView.swift in Sources */,
+				CA0AB8E4FDCF5905C26615F8 /* RecordingSession.swift in Sources */,
+				0207B244125EB34057A4E906 /* SettingsView.swift in Sources */,
+				4590AAB7CEE7E6916FA966E2 /* SummaryService.swift in Sources */,
+				828E80CC7F26D19C48D84BB8 /* TapNoteApp.swift in Sources */,
+				28472709891573FEF32A202C /* TranscriptionService.swift in Sources */,
+				1C322E5ECE897DBE716A31A1 /* TrimView.swift in Sources */,
+				4A527365A58CD5729D1F395B /* WatchBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		58EB3DCED092B9551227FD99 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D505BDC94CB589E4B495E70B /* AppLogger.swift in Sources */,
+				016C065420D16D59A18D174C /* AudioFileStore.swift in Sources */,
+				39EDB6EDA55E3971E54342AE /* AudioPlayerService.swift in Sources */,
+				FF20670D4D584EEB11313E09 /* AudioTrimService.swift in Sources */,
+				187DD25B81E45C83E8A50DB1 /* Formatters.swift in Sources */,
+				A56B2273A9A8C5C9557EC00C /* ICloudDocumentSync.swift in Sources */,
+				2C50912D8DF068B6C4C3CED7 /* KeychainHelper.swift in Sources */,
+				017C97B895F5854C8A4F0283 /* MemoLibraryStore.swift in Sources */,
+				DCAB30EF5EF1453D44BD1C07 /* MemoRecording.swift in Sources */,
+				6FF14BD1BF48FF01BA60767E /* OpenAICompatibleClient.swift in Sources */,
+				CF4FE9271C780B9700A24980 /* RecordWatchView.swift in Sources */,
+				D7FA20421C4F90D75D8152B3 /* RecordingSession.swift in Sources */,
+				D2D6FABACADDC91848766036 /* SummaryService.swift in Sources */,
+				E646DADD892E1A73E7572CBB /* TapNoteWatchApp.swift in Sources */,
+				436FDAEE98284E6D4B848CF6 /* TranscriptionService.swift in Sources */,
+				9742069FF72B8F5A8B4810E1 /* WatchBridge.swift in Sources */,
+				EA03B631FE3E648BA8E7762C /* WatchLibraryView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E038024AD2FAB6B4A10F3883 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA69FAB2A8C6E3613EE32E65 /* TapNoteWatchWidgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B53D093CEB7711470194610A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84FDBC96F25B069BFEAE3404 /* TapNoteWatch */;
+			targetProxy = 7F363BFBB18762D20BA356E2 /* PBXContainerItemProxy */;
+		};
+		E431E754ACF7353D3E7914D6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FFD934DD1DE9E87FB8323F13 /* TapNoteWatchWidgets */;
+			targetProxy = AE98E9E80EC8D6E3F01C60AC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1F4A9940B65D456D292283BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		6A627AEA5910E74D7C8C558B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TapNoteWatch/TapNoteWatch.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNoteWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		706A71F7897E744F557CFAD0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.10;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		8E1A0803C23AC37F43E749A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TapNoteWatch/TapNoteWatch.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNoteWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		D3DA81B34B90CA0ADDB30A6C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNoteWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		E0B2AE0BCC05AD67EC3A2140 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TapNote/TapNote.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNote/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		E4CF8569A259C54080875997 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNoteWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		E7A034C61FAA025F8D55C62A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TapNote/TapNote.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TapNote/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0D02088BD05322746DD0E4E4 /* Build configuration list for PBXNativeTarget "TapNoteWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E1A0803C23AC37F43E749A5 /* Debug */,
+				6A627AEA5910E74D7C8C558B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3237B0F23401D5A467FFFD4F /* Build configuration list for PBXNativeTarget "TapNoteWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3DA81B34B90CA0ADDB30A6C /* Debug */,
+				E4CF8569A259C54080875997 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		703B7A67672FEF2675586B9E /* Build configuration list for PBXNativeTarget "TapNote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7A034C61FAA025F8D55C62A /* Debug */,
+				E0B2AE0BCC05AD67EC3A2140 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E654905BFC9DD663503483DD /* Build configuration list for PBXProject "TapNote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				706A71F7897E744F557CFAD0 /* Debug */,
+				1F4A9940B65D456D292283BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F919867D16058CF3E6CBA537 /* Project object */;
+}
