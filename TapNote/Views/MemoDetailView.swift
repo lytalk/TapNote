@@ -6,7 +6,6 @@ struct MemoDetailView: View {
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var player: AudioPlayerService
     @StateObject private var transcription = TranscriptionService.shared
-    @StateObject private var summary = SummaryService.shared
     @State private var showTrim = false
     @State private var shareItems: [Any] = []
     @State private var showShare = false
@@ -43,9 +42,12 @@ struct MemoDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                Text("来源：\(memo.sourceDevice)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
 
-            Section("文稿") {
+            Section("文稿（系统 Speech）") {
                 if let text = memo.transcriptText, memo.transcriptStatus == .completed {
                     Text(text)
                         .textSelection(.enabled)
@@ -62,24 +64,6 @@ struct MemoDetailView: View {
                     Task { await transcription.transcribe(memoID: memo.id) }
                 }
                 .disabled(transcription.isTranscribing)
-            }
-
-            if SummaryService.shared.isAIEnabled {
-                Section("AI 总结") {
-                    if let text = memo.summaryText, memo.summaryStatus == .completed {
-                        Text(text).textSelection(.enabled)
-                    } else if memo.summaryStatus == .processing || summary.isRunning {
-                        ProgressView("总结中…")
-                    } else if memo.summaryStatus == .failed {
-                        Text(memo.summaryText ?? "失败").foregroundStyle(.red)
-                    } else {
-                        Text("尚未总结").foregroundStyle(.secondary)
-                    }
-                    Button("生成总结") {
-                        Task { await summary.summarize(memoID: memo.id, force: true) }
-                    }
-                    .disabled(summary.isRunning || memo.transcriptStatus != .completed)
-                }
             }
 
             Section("操作") {
@@ -108,17 +92,7 @@ struct MemoDetailView: View {
     }
 
     private func togglePlay(_ memo: MemoRecording) {
-        do {
-            if player.playingID == memo.id, player.isPlaying {
-                player.pause()
-            } else if player.playingID == memo.id {
-                player.resume()
-            } else {
-                try player.play(memo: memo)
-            }
-        } catch {
-            AppLogger.record.error("Play failed: \(error.localizedDescription)")
-        }
+        player.toggle(memo: memo)
     }
 }
 

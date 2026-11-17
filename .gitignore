@@ -30,3 +30,5 @@ Carthage/Build/
 *.pem
 .env
 .env.*
+
+.derivedData/

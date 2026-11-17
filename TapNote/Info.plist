@@ -31,5 +31,13 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TapNote 需要使用麦克风录制语音备忘。</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>TapNote 使用系统语音识别（Speech）将录音转成文字，默认优先中文（zh-CN）。</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

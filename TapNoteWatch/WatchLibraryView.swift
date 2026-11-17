@@ -37,26 +37,42 @@ struct WatchPlaybackView: View {
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var player: AudioPlayerService
 
+    @State private var crownPosition: Double = 0
+    @State private var isScrubbing = false
+    @FocusState private var crownFocused: Bool
+
     private var memo: MemoRecording? { library.memo(id: memoID) }
 
     var body: some View {
         Group {
             if let memo {
-                VStack(spacing: 10) {
+                VStack(spacing: 8) {
                     Text(memo.title)
                         .font(.headline)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
 
-                    Text("\(Formatters.durationString(player.playingID == memo.id ? player.currentTime : 0)) / \(Formatters.durationString(memo.duration))")
-                        .font(.caption.monospacedDigit())
+                    // Progress bar
+                    ProgressView(
+                        value: progressValue(for: memo),
+                        total: max(memo.duration, 0.1)
+                    )
+                    .tint(.red)
+
+                    Text("\(Formatters.durationString(displayTime(for: memo))) / \(Formatters.durationString(memo.duration))")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+
+                    Text("转动表冠快进/快退")
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
 
                     Button {
                         player.toggle(memo: memo)
+                        syncCrown(from: player.currentTime)
                     } label: {
                         Image(systemName: player.isPlaying && player.playingID == memo.id ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 52))
+                            .font(.system(size: 48))
                             .foregroundStyle(Color.accentColor)
                     }
                     .buttonStyle(.plain)
@@ -69,7 +85,35 @@ struct WatchPlaybackView: View {
                             .multilineTextAlignment(.center)
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 2)
+                .focusable(true)
+                .focused($crownFocused)
+                .digitalCrownRotation(
+                    $crownPosition,
+                    from: 0,
+                    through: max(memo.duration, 0.1),
+                    by: 0.25,
+                    sensitivity: .medium,
+                    isContinuous: false,
+                    isHapticFeedbackEnabled: true
+                )
+                .onChange(of: crownPosition) { _, newValue in
+                    isScrubbing = true
+                    do {
+                        try player.prepare(memo: memo, seekTo: newValue)
+                    } catch {
+                        player.lastError = error.localizedDescription
+                    }
+                    isScrubbing = false
+                }
+                .onChange(of: player.currentTime) { _, newValue in
+                    guard !isScrubbing, player.playingID == memo.id else { return }
+                    syncCrown(from: newValue)
+                }
+                .onAppear {
+                    crownFocused = true
+                    syncCrown(from: player.playingID == memo.id ? player.currentTime : 0)
+                }
             } else {
                 Text("录音不存在")
             }
@@ -80,5 +124,18 @@ struct WatchPlaybackView: View {
                 player.stop()
             }
         }
+    }
+
+    private func displayTime(for memo: MemoRecording) -> TimeInterval {
+        if isScrubbing { return crownPosition }
+        return player.playingID == memo.id ? player.currentTime : crownPosition
+    }
+
+    private func progressValue(for memo: MemoRecording) -> Double {
+        displayTime(for: memo)
+    }
+
+    private func syncCrown(from time: TimeInterval) {
+        crownPosition = max(0, time)
     }
 }

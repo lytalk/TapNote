@@ -84,8 +84,39 @@ final class AudioPlayerService: NSObject, ObservableObject, AVAudioPlayerDelegat
     }
 
     func seek(to time: TimeInterval) {
-        player?.currentTime = time
-        currentTime = time
+        let clamped = max(0, min(time, player?.duration ?? time))
+        player?.currentTime = clamped
+        currentTime = clamped
+    }
+
+    /// Load audio for scrubbing without forcing playback if already prepared.
+    func prepare(memo: MemoRecording, seekTo time: TimeInterval? = nil) throws {
+        lastError = nil
+        if playingID != memo.id || player == nil {
+            let url = AudioFileStore.shared.audioURL(for: memo)
+            try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                lastError = "找不到音频文件"
+                throw PlaybackError.fileMissing
+            }
+            let session = AVAudioSession.sharedInstance()
+            #if os(watchOS)
+            try session.setCategory(.playback, mode: .default)
+            #else
+            try session.setCategory(.playback, mode: .spokenAudio, options: [.defaultToSpeaker])
+            #endif
+            try session.setActive(true)
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.delegate = self
+            player.prepareToPlay()
+            self.player = player
+            self.playingID = memo.id
+            self.duration = player.duration
+            self.isPlaying = false
+        }
+        if let time {
+            seek(to: time)
+        }
     }
 
     nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {

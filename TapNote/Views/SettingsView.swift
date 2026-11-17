@@ -1,69 +1,62 @@
 import SwiftUI
+import WatchConnectivity
 
 struct SettingsView: View {
     @EnvironmentObject private var sync: ICloudDocumentSync
-    @State private var baseURL = AISettings.current.baseURL
-    @State private var model = AISettings.current.model
-    @State private var apiKey = AISettings.current.apiKey ?? ""
-    @State private var wifiOnly = AISettings.current.wifiOnly
-    @State private var manualOnly = AISettings.current.manualOnly
-    @State private var savedToast = false
+    @EnvironmentObject private var bridge: WatchBridge
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("同步") {
                     LabeledContent("iCloud", value: sync.statusText)
-                    Text("策略：文件级 iCloud Documents；冲突以 updatedAt 较新者为准（LWW）并写日志。")
+                    if !sync.diagnosticDetail.isEmpty {
+                        Text(sync.diagnosticDetail)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent(
+                        "WatchConnectivity",
+                        value: bridge.isReachable ? "手表可达" : "手表未可达 / 未连接"
+                    )
+                    LabeledContent(
+                        "WCSession",
+                        value: wcStateLabel(bridge.activationState)
+                    )
+                    if let msg = bridge.lastTransferMessage {
+                        Text(msg)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("手表→手机不依赖 iCloud：优先 WatchConnectivity（sendMessage / transferFile）。同 Apple ID 且打开 iCloud 云盘时，还可走 iCloud Documents；冲突以 updatedAt 较新者为准。")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
-                Section("语音") {
-                    Text("默认转写语言：zh-CN（系统 Speech）")
+                Section("语音转写") {
+                    Text("使用 iOS 系统 Speech（SFSpeechRecognizer），默认语言 zh-CN。手表录音在同步到 iPhone 后自动转写。无第三方 AI 总结。")
                         .font(.footnote)
-                }
-
-                Section("OpenAI 兼容接口") {
-                    TextField("Base URL", text: $baseURL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    SecureField("API Key（存 Keychain）", text: $apiKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    TextField("Model", text: $model)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    Toggle("仅 Wi-Fi 时请求", isOn: $wifiOnly)
-                    Toggle("仅手动触发总结", isOn: $manualOnly)
-                    Button("保存 AI 设置") {
-                        let settings = AISettings(
-                            baseURL: baseURL,
-                            model: model,
-                            wifiOnly: wifiOnly,
-                            manualOnly: manualOnly
-                        )
-                        settings.save(apiKey: apiKey)
-                        savedToast = true
-                    }
-                    if apiKey.isEmpty {
-                        Text("未配置 Key 时，录音与转写仍可用；AI 入口会隐藏。")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("关于") {
-                    LabeledContent("版本", value: "1.0 (M0–M4)")
+                    LabeledContent("版本", value: "1.0")
                     Text("TapNote — Apple Watch + iPhone 语音速记")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("设置")
-            .alert("已保存", isPresented: $savedToast) {
-                Button("好", role: .cancel) {}
-            }
+            .onAppear { sync.refreshAvailability() }
+        }
+    }
+
+    private func wcStateLabel(_ state: WCSessionActivationState) -> String {
+        switch state {
+        case .notActivated: return "未激活"
+        case .inactive: return "未激活中"
+        case .activated: return "已激活"
+        @unknown default: return "未知"
         }
     }
 }

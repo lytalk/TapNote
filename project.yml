@@ -30,12 +30,22 @@ targets:
         GENERATE_INFOPLIST_FILE: false
     entitlements:
       path: TapNote/TapNote.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.lytalk.TapNote
+        com.apple.developer.ubiquity-container-identifiers:
+          - iCloud.com.lytalk.TapNote
+        com.apple.developer.icloud-services:
+          - CloudDocuments
     dependencies:
       - target: TapNoteWatch
     info:
       path: TapNote/Info.plist
       properties:
         CFBundleDisplayName: TapNote
+        NSMicrophoneUsageDescription: TapNote 需要使用麦克风录制语音备忘。
+        NSSpeechRecognitionUsageDescription: TapNote 使用系统语音识别（Speech）将录音转成文字，默认优先中文（zh-CN）。
+        UIBackgroundModes: [audio]
         CFBundleURLTypes:
           - CFBundleURLName: com.lytalk.TapNote
             CFBundleURLSchemes: [tapnote]
@@ -60,6 +70,13 @@ targets:
         SKIP_INSTALL: true
     entitlements:
       path: TapNoteWatch/TapNoteWatch.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.lytalk.TapNote
+        com.apple.developer.ubiquity-container-identifiers:
+          - iCloud.com.lytalk.TapNote
+        com.apple.developer.icloud-services:
+          - CloudDocuments
     dependencies:
       - target: TapNoteWatchWidgets
     info:

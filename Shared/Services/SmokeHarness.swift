@@ -123,7 +123,8 @@ enum SmokeHarness {
         Task { await TranscriptionService.shared.transcribe(memoID: memoIDForTranscript) }
         check("transcript_pipeline", true, "started_async (completion is device/network dependent)")
 
-        check("ai_hidden_without_key", !SummaryService.shared.isAIEnabled, "configured=\(AISettings.current.isConfigured)")
+        // AI summary UI removed — keep native Speech only.
+        check("ai_ui_removed", !SummaryService.shared.isAIEnabled, "native Speech only")
 
         let audioURL = AudioFileStore.shared.audioURL(for: memo)
         check("share_audio_file", FileManager.default.fileExists(atPath: audioURL.path), audioURL.lastPathComponent)

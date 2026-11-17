@@ -9,7 +9,7 @@ final class TranscriptionService: ObservableObject {
 
     @Published private(set) var isTranscribing = false
 
-    #if canImport(Speech)
+    #if canImport(Speech) && os(iOS)
     /// Chinese-friendly default; falls back to device locale.
     var preferredLocale: Locale {
         let zh = Locale(identifier: "zh-CN")
@@ -35,6 +35,15 @@ final class TranscriptionService: ObservableObject {
 
         defer { isTranscribing = false }
 
+        // Missing usage description aborts the process — never call Speech without the key.
+        guard Bundle.main.object(forInfoDictionaryKey: "NSSpeechRecognitionUsageDescription") != nil else {
+            memo.transcriptStatus = .failed
+            memo.transcriptText = "缺少语音识别用途说明（NSSpeechRecognitionUsageDescription）。"
+            MemoLibraryStore.shared.save(memo)
+            AppLogger.speech.error("NSSpeechRecognitionUsageDescription missing — skip Speech")
+            return
+        }
+
         let auth = await requestAuthorization()
         guard auth == .authorized else {
             memo.transcriptStatus = .failed
@@ -52,6 +61,12 @@ final class TranscriptionService: ObservableObject {
 
         let url = AudioFileStore.shared.audioURL(for: memo)
         try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            memo.transcriptStatus = .failed
+            memo.transcriptText = "找不到音频文件，无法转写。"
+            MemoLibraryStore.shared.save(memo)
+            return
+        }
 
         do {
             let text = try await recognize(url: url, recognizer: recognizer)
@@ -73,12 +88,16 @@ final class TranscriptionService: ObservableObject {
         request.requiresOnDeviceRecognition = false
 
         return try await withCheckedThrowingContinuation { continuation in
+            var finished = false
             recognizer.recognitionTask(with: request) { result, error in
+                guard !finished else { return }
                 if let error {
+                    finished = true
                     continuation.resume(throwing: error)
                     return
                 }
                 guard let result, result.isFinal else { return }
+                finished = true
                 continuation.resume(returning: result.bestTranscription.formattedString)
             }
         }
