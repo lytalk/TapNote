@@ -16,8 +16,14 @@ final class RecordingSession: NSObject, ObservableObject {
 
     func requestPermission() async -> Bool {
         await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { granted in
-                continuation.resume(returning: granted)
+            if #available(iOS 17.0, watchOS 10.0, *) {
+                AVAudioApplication.requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
+            } else {
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
             }
         }
     }
@@ -32,11 +38,15 @@ final class RecordingSession: NSObject, ObservableObject {
         }
 
         let session = AVAudioSession.sharedInstance()
+        #if os(watchOS)
+        try session.setCategory(.playAndRecord, mode: .default)
+        #else
         try session.setCategory(
             .playAndRecord,
             mode: .spokenAudio,
             options: [.defaultToSpeaker, .allowBluetooth]
         )
+        #endif
         try session.setActive(true, options: .notifyOthersOnDeactivation)
 
         let id = UUID()

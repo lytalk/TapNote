@@ -43,6 +43,11 @@ targets:
     sources:
       - path: TapNoteWatch
       - path: Shared
+        excludes:
+          - Services/TranscriptionService.swift
+          - Services/SummaryService.swift
+          - Services/OpenAICompatibleClient.swift
+          - Services/AudioTrimService.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lytalk.TapNote.watchkitapp

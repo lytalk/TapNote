@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(Speech)
 import Speech
+#endif
 
 @MainActor
 final class TranscriptionService: ObservableObject {
@@ -7,6 +9,7 @@ final class TranscriptionService: ObservableObject {
 
     @Published private(set) var isTranscribing = false
 
+    #if canImport(Speech)
     /// Chinese-friendly default; falls back to device locale.
     var preferredLocale: Locale {
         let zh = Locale(identifier: "zh-CN")
@@ -80,4 +83,9 @@ final class TranscriptionService: ObservableObject {
             }
         }
     }
+    #else
+    func transcribe(memoID: UUID) async {
+        AppLogger.speech.warning("Speech unavailable on this platform; skip \(memoID.uuidString, privacy: .public)")
+    }
+    #endif
 }

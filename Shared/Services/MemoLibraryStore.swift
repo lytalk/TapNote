@@ -124,7 +124,7 @@ final class MemoLibraryStore: ObservableObject {
 
     private func startObservingiCloud() {
         ubiquityObserver = NotificationCenter.default.addObserver(
-            forName: NSMetadataQueryDidUpdateNotification,
+            forName: .NSMetadataQueryDidUpdate,
             object: nil,
             queue: .main
         ) { [weak self] _ in

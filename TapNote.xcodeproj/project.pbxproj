@@ -19,7 +19,6 @@
 		39EDB6EDA55E3971E54342AE /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44CC0797D0DAAD2557723F /* AudioPlayerService.swift */; };
 		3B8ED9BF55E0F2805A4DBACC /* MemoRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E4BBFC6D1E69733984050 /* MemoRecording.swift */; };
 		3FDEEE5C3FE657AAEE018032 /* MemoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDB2AFF2068A577F0E6B150 /* MemoDetailView.swift */; };
-		436FDAEE98284E6D4B848CF6 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A16AD85F663F7A733E2A89 /* TranscriptionService.swift */; };
 		437DDA7C899D6E6221E49067 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38EA841DB5076EBB9D14C7E /* RecordView.swift */; };
 		45109F21A7E3575168C343FA /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */; };
 		4590AAB7CEE7E6916FA966E2 /* SummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7715C1F82B5223EB85BDA /* SummaryService.swift */; };
@@ -27,7 +26,6 @@
 		528284798C1824158B285698 /* TapNoteWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 709FC35A43418BA12EEE3EC6 /* TapNoteWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		55B8277F7A48D00287FE80AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94107C76BF6A5F94465CE85 /* ContentView.swift */; };
 		55E33DCD62C99051A351AC47 /* MemoLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A19BC9E941371A03A95E695 /* MemoLibraryStore.swift */; };
-		6FF14BD1BF48FF01BA60767E /* OpenAICompatibleClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */; };
 		7073FF60CC4E5085B980CD2C /* OpenAICompatibleClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA48BC9435C409085F15B13F /* OpenAICompatibleClient.swift */; };
 		828E80CC7F26D19C48D84BB8 /* TapNoteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD571137B0BC4E84E887E835 /* TapNoteApp.swift */; };
 		9742069FF72B8F5A8B4810E1 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF26E1257DB46B6F97E2B6AC /* WatchBridge.swift */; };
@@ -36,7 +34,6 @@
 		CC920E11B1E2B930526AF149 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E74F1C8D0A52B65D31BA021D /* Formatters.swift */; };
 		CF4FE9271C780B9700A24980 /* RecordWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2D55ACAF64B80043D51EC5 /* RecordWatchView.swift */; };
 		D2BB826A7CBF3F5C0A6D3806 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7D09C68AF58819654F28543 /* Assets.xcassets */; };
-		D2D6FABACADDC91848766036 /* SummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F7715C1F82B5223EB85BDA /* SummaryService.swift */; };
 		D505BDC94CB589E4B495E70B /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BCD2EC88AB0BF6462E6BE7 /* AppLogger.swift */; };
 		D7FA20421C4F90D75D8152B3 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7EE0A93134D1869FEFE282 /* RecordingSession.swift */; };
 		D9B5C1343B9FC914656B511F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 520A041B96948CC54E5DC7CB /* PrivacyInfo.xcprivacy */; };
@@ -50,7 +47,6 @@
 		F25F314F82241400A5511108 /* ICloudDocumentSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE805F80EF3500178F1BB079 /* ICloudDocumentSync.swift */; };
 		F3B49EE460D30EB28746B456 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B71169B086F0ADEAA1357B14 /* LibraryView.swift */; };
 		FA69FAB2A8C6E3613EE32E65 /* TapNoteWatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A982FFF84F0A32C448EE03 /* TapNoteWatchWidgets.swift */; };
-		FF20670D4D584EEB11313E09 /* AudioTrimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D564C9B2520CE470A84171 /* AudioTrimService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -409,18 +405,14 @@
 				D505BDC94CB589E4B495E70B /* AppLogger.swift in Sources */,
 				016C065420D16D59A18D174C /* AudioFileStore.swift in Sources */,
 				39EDB6EDA55E3971E54342AE /* AudioPlayerService.swift in Sources */,
-				FF20670D4D584EEB11313E09 /* AudioTrimService.swift in Sources */,
 				187DD25B81E45C83E8A50DB1 /* Formatters.swift in Sources */,
 				A56B2273A9A8C5C9557EC00C /* ICloudDocumentSync.swift in Sources */,
 				2C50912D8DF068B6C4C3CED7 /* KeychainHelper.swift in Sources */,
 				017C97B895F5854C8A4F0283 /* MemoLibraryStore.swift in Sources */,
 				DCAB30EF5EF1453D44BD1C07 /* MemoRecording.swift in Sources */,
-				6FF14BD1BF48FF01BA60767E /* OpenAICompatibleClient.swift in Sources */,
 				CF4FE9271C780B9700A24980 /* RecordWatchView.swift in Sources */,
 				D7FA20421C4F90D75D8152B3 /* RecordingSession.swift in Sources */,
-				D2D6FABACADDC91848766036 /* SummaryService.swift in Sources */,
 				E646DADD892E1A73E7572CBB /* TapNoteWatchApp.swift in Sources */,
-				436FDAEE98284E6D4B848CF6 /* TranscriptionService.swift in Sources */,
 				9742069FF72B8F5A8B4810E1 /* WatchBridge.swift in Sources */,
 				EA03B631FE3E648BA8E7762C /* WatchLibraryView.swift in Sources */,
 			);
