@@ -4,18 +4,22 @@ import SwiftUI
 struct TapNoteWatchApp: App {
     @StateObject private var library = MemoLibraryStore.shared
     @StateObject private var bridge = WatchBridge.shared
+    @StateObject private var deepLink = DeepLinkRouter.shared
 
     var body: some Scene {
         WindowGroup {
             RecordWatchView()
                 .environmentObject(library)
                 .environmentObject(bridge)
+                .environmentObject(deepLink)
                 .onAppear {
+                    deepLink.ingestLaunchArgumentsIfNeeded()
                     bridge.activate()
                     ICloudDocumentSync.shared.start()
+                    SmokeHarness.runIfNeeded()
                 }
-                .onOpenURL { _ in
-                    // Complication / deep link → already on record UI
+                .onOpenURL { url in
+                    deepLink.handle(url: url)
                 }
         }
     }

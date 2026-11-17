@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -37,8 +38,12 @@ struct RecordComplicationView: View {
         case .accessoryRectangular:
             HStack {
                 Image(systemName: "mic.circle.fill")
-                Text("TapNote")
-                    .font(.headline)
+                VStack(alignment: .leading) {
+                    Text("TapNote")
+                        .font(.headline)
+                    Text("一键录音")
+                        .font(.caption2)
+                }
             }
         default:
             Image(systemName: "mic.fill")
@@ -58,12 +63,16 @@ struct RecordComplication: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: RecordProvider()) { _ in
-            RecordComplicationView()
-                .containerBackground(.fill.tertiary, for: .widget)
-                .widgetURL(URL(string: "tapnote://record"))
+            // Tappable complication: App Intent starts recording; URL is fallback.
+            Button(intent: StartRecordingIntent()) {
+                RecordComplicationView()
+            }
+            .buttonStyle(.plain)
+            .containerBackground(.fill.tertiary, for: .widget)
+            .widgetURL(URL(string: "tapnote://record"))
         }
         .configurationDisplayName("TapNote 录音")
-        .description("快速打开 TapNote 开始录音")
+        .description("一键开始录音（无需先打开应用再点按钮）")
         .supportedFamilies([
             .accessoryCircular,
             .accessoryCorner,

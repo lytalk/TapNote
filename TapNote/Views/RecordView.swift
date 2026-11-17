@@ -3,6 +3,7 @@ import SwiftUI
 struct RecordView: View {
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var bridge: WatchBridge
+    @EnvironmentObject private var deepLink: DeepLinkRouter
     @StateObject private var session = RecordingSession()
     @State private var errorText: String?
 
@@ -36,6 +37,25 @@ struct RecordView: View {
                 Spacer()
             }
             .navigationTitle("录音")
+            .onAppear {
+                Task { await consumeAutoRecordIfNeeded() }
+            }
+            .onChange(of: deepLink.pendingAutoRecord) { _, pending in
+                if pending {
+                    Task { await consumeAutoRecordIfNeeded() }
+                }
+            }
+        }
+    }
+
+    private func consumeAutoRecordIfNeeded() async {
+        guard deepLink.consumeAutoRecordIfNeeded() else { return }
+        guard !session.isRecording else { return }
+        errorText = nil
+        do {
+            _ = try await session.start()
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 
@@ -45,7 +65,7 @@ struct RecordView: View {
             if session.isRecording {
                 let (memo, _) = try await session.stop()
                 library.upsert(memo, preferIncomingIfNewer: false)
-                await TranscriptionService.shared.transcribe(memoID: memo.id)
+                Task { await TranscriptionService.shared.transcribe(memoID: memo.id) }
             } else {
                 _ = try await session.start()
             }

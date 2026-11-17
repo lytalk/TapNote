@@ -3,6 +3,7 @@ import SwiftUI
 struct RecordWatchView: View {
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var bridge: WatchBridge
+    @EnvironmentObject private var deepLink: DeepLinkRouter
     @StateObject private var session = RecordingSession()
     @State private var errorText: String?
     @Environment(\.scenePhase) private var scenePhase
@@ -40,12 +41,33 @@ struct RecordWatchView: View {
                 .font(.caption)
             }
             .navigationTitle("TapNote")
+            .onAppear {
+                Task { await consumeAutoRecordIfNeeded() }
+            }
+            .onChange(of: deepLink.pendingAutoRecord) { _, pending in
+                if pending {
+                    Task { await consumeAutoRecordIfNeeded() }
+                }
+            }
             .onChange(of: scenePhase) { _, phase in
-                // Best-effort: keep session category active; watchOS may suspend mic when inactive.
                 if phase == .background, session.isRecording {
                     AppLogger.record.info("Entered background while recording")
                 }
+                if phase == .active {
+                    Task { await consumeAutoRecordIfNeeded() }
+                }
             }
+        }
+    }
+
+    private func consumeAutoRecordIfNeeded() async {
+        guard deepLink.consumeAutoRecordIfNeeded() else { return }
+        guard !session.isRecording else { return }
+        errorText = nil
+        do {
+            _ = try await session.start()
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 
@@ -57,7 +79,6 @@ struct RecordWatchView: View {
                 library.upsert(memo, preferIncomingIfNewer: false)
                 bridge.sendMemoToPhone(memo)
             } else {
-                // Prefer extended runtime session style habits: activate audio session before record.
                 _ = try await session.start()
             }
         } catch {

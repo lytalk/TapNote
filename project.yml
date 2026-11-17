@@ -36,6 +36,9 @@ targets:
       path: TapNote/Info.plist
       properties:
         CFBundleDisplayName: TapNote
+        CFBundleURLTypes:
+          - CFBundleURLName: com.lytalk.TapNote
+            CFBundleURLSchemes: [tapnote]
 
   TapNoteWatch:
     type: application
@@ -68,12 +71,18 @@ targets:
         WKRunsIndependentlyOfCompanionApp: true
         NSMicrophoneUsageDescription: TapNote 需要使用麦克风在 Apple Watch 上录制语音备忘。
         UIBackgroundModes: [audio]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.lytalk.TapNote.watchkitapp
+            CFBundleURLSchemes: [tapnote]
 
   TapNoteWatchWidgets:
     type: app-extension
     platform: watchOS
     sources:
       - path: TapNoteWatchWidgets
+      - path: Shared/Intents
+      - path: Shared/Services/DeepLinkRouter.swift
+      - path: Shared/Services/AppLogger.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lytalk.TapNote.watchkitapp.widgets

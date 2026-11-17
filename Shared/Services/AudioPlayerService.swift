@@ -7,27 +7,59 @@ final class AudioPlayerService: NSObject, ObservableObject, AVAudioPlayerDelegat
     @Published private(set) var currentTime: TimeInterval = 0
     @Published private(set) var duration: TimeInterval = 0
     @Published private(set) var playingID: UUID?
+    @Published var lastError: String?
 
     private var player: AVAudioPlayer?
     private var tick: Timer?
 
     func play(memo: MemoRecording) throws {
         stop()
+        lastError = nil
         let url = AudioFileStore.shared.audioURL(for: memo)
         try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            lastError = "找不到音频文件"
+            throw PlaybackError.fileMissing
+        }
+
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playback, mode: .spokenAudio)
+        #if os(watchOS)
+        // watchOS: playback category (not playAndRecord) so library items actually audible.
+        try session.setCategory(.playback, mode: .default)
+        #else
+        try session.setCategory(.playback, mode: .spokenAudio, options: [.defaultToSpeaker])
+        #endif
         try session.setActive(true)
 
         let player = try AVAudioPlayer(contentsOf: url)
         player.delegate = self
         player.prepareToPlay()
-        player.play()
+        guard player.play() else {
+            lastError = "无法开始播放"
+            throw PlaybackError.failedToPlay
+        }
         self.player = player
         self.playingID = memo.id
         self.duration = player.duration
         self.isPlaying = true
         startTick()
+        AppLogger.record.info("Playing \(memo.id.uuidString, privacy: .public) path=\(url.lastPathComponent, privacy: .public)")
+    }
+
+    func toggle(memo: MemoRecording) {
+        do {
+            if playingID == memo.id, isPlaying {
+                pause()
+            } else if playingID == memo.id {
+                resume()
+            } else {
+                try play(memo: memo)
+            }
+        } catch {
+            lastError = error.localizedDescription
+            AppLogger.record.error("Play failed: \(error.localizedDescription)")
+        }
     }
 
     func pause() {
@@ -70,6 +102,18 @@ final class AudioPlayerService: NSObject, ObservableObject, AVAudioPlayerDelegat
             Task { @MainActor in
                 self?.currentTime = self?.player?.currentTime ?? 0
             }
+        }
+    }
+}
+
+enum PlaybackError: LocalizedError {
+    case fileMissing
+    case failedToPlay
+
+    var errorDescription: String? {
+        switch self {
+        case .fileMissing: return "找不到音频文件"
+        case .failedToPlay: return "无法开始播放"
         }
     }
 }
