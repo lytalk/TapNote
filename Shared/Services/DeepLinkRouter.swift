@@ -8,6 +8,7 @@ final class DeepLinkRouter: ObservableObject {
     static let pendingAutoRecordKey = "tapnote.pendingAutoRecord"
 
     @Published var pendingAutoRecord = false
+    @Published var pendingMemoID: UUID?
 
     func handle(url: URL) {
         guard url.scheme?.lowercased() == "tapnote" else { return }
@@ -15,6 +16,28 @@ final class DeepLinkRouter: ObservableObject {
         if host == "record" || url.absoluteString.lowercased().contains("record") {
             markAutoRecord()
         }
+        if host.hasPrefix("memo"), let id = UUID(uuidString: url.lastPathComponent) {
+            pendingMemoID = id
+        }
+        // tapnote://memo/<uuid>
+        if url.pathComponents.contains(where: { $0.lowercased() == "memo" }),
+           let idString = url.pathComponents.last,
+           let id = UUID(uuidString: idString) {
+            pendingMemoID = id
+        }
+    }
+
+    func consumePendingMemoID() -> UUID? {
+        if let id = pendingMemoID {
+            pendingMemoID = nil
+            return id
+        }
+        if let raw = UserDefaults.standard.string(forKey: "tapnote.openMemoID"),
+           let id = UUID(uuidString: raw) {
+            UserDefaults.standard.removeObject(forKey: "tapnote.openMemoID")
+            return id
+        }
+        return nil
     }
 
     func markAutoRecord() {

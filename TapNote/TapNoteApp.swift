@@ -20,6 +20,9 @@ struct TapNoteApp: App {
                     bridge.activate()
                     sync.start()
                     SmokeHarness.runIfNeeded()
+                    #if os(iOS)
+                    SpeechReliabilityHarness.runIfNeeded()
+                    #endif
                 }
                 .onOpenURL { url in
                     deepLink.handle(url: url)

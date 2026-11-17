@@ -3,11 +3,13 @@ import SwiftUI
 struct LibraryView: View {
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var sync: ICloudDocumentSync
+    @EnvironmentObject private var deepLink: DeepLinkRouter
     @State private var renameTarget: MemoRecording?
     @State private var renameText = ""
+    @State private var path = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if library.memos.isEmpty {
                     ContentUnavailableView(
@@ -60,6 +62,10 @@ struct LibraryView: View {
                 }
             }
             .navigationTitle("TapNote")
+            .onAppear { openPendingMemoIfNeeded() }
+            .onChange(of: deepLink.pendingMemoID) { _, _ in
+                openPendingMemoIfNeeded()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -89,6 +95,14 @@ struct LibraryView: View {
                 }
                 Button("取消", role: .cancel) { renameTarget = nil }
             }
+        }
+    }
+
+    private func openPendingMemoIfNeeded() {
+        guard let id = deepLink.consumePendingMemoID() else { return }
+        library.reloadFromDisk()
+        if library.memo(id: id) != nil {
+            path.append(id)
         }
     }
 }

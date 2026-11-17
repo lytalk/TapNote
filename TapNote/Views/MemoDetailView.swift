@@ -47,12 +47,36 @@ struct MemoDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("文稿（系统 Speech）") {
-                if let text = memo.transcriptText, memo.transcriptStatus == .completed {
-                    Text(text)
-                        .textSelection(.enabled)
+            Section {
+                if memo.transcriptStatus == .completed {
+                    if let segments = memo.transcriptSegments, !segments.isEmpty {
+                        ForEach(segments) { segment in
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text(segment.speakerLabel)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(speakerColor(segment.speakerIndex))
+                                    Spacer()
+                                    Text(segment.timeRangeLabel)
+                                        .font(.caption2.monospacedDigit())
+                                        .foregroundStyle(.secondary)
+                                }
+                                Text(segment.text)
+                                    .textSelection(.enabled)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                        if memo.speakerCount > 1 {
+                            Text("检测到 \(memo.speakerCount) 位说话人（端侧频谱聚类，非神经说话人 ID）")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if let text = memo.transcriptText {
+                        Text(text)
+                            .textSelection(.enabled)
+                    }
                 } else if memo.transcriptStatus == .processing || transcription.isTranscribing {
-                    ProgressView("转写中…")
+                    ProgressView(transcription.progressText ?? "转写中…")
                 } else if memo.transcriptStatus == .failed {
                     Text(memo.transcriptText ?? "转写失败")
                         .foregroundStyle(.red)
@@ -60,10 +84,13 @@ struct MemoDetailView: View {
                     Text("尚未转写")
                         .foregroundStyle(.secondary)
                 }
+
                 Button("转写 / 重试") {
                     Task { await transcription.transcribe(memoID: memo.id) }
                 }
                 .disabled(transcription.isTranscribing)
+            } header: {
+                Text("文稿（系统 Speech · 多说话人）")
             }
 
             Section("操作") {
@@ -93,6 +120,11 @@ struct MemoDetailView: View {
 
     private func togglePlay(_ memo: MemoRecording) {
         player.toggle(memo: memo)
+    }
+
+    private func speakerColor(_ index: Int) -> Color {
+        let palette: [Color] = [.indigo, .teal, .orange, .pink, .mint, .brown]
+        return palette[index % palette.count]
     }
 }
 

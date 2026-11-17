@@ -34,7 +34,7 @@ struct SettingsView: View {
                 }
 
                 Section("语音转写") {
-                    Text("使用 iOS 系统 Speech（SFSpeechRecognizer），默认语言 zh-CN。手表录音在同步到 iPhone 后自动转写。无第三方 AI 总结。")
+                    Text("优先 iOS 26+ SpeechAnalyzer（端侧长语音模型，zh-CN）；失败时回退 SFSpeechRecognizer（优先 on-device）。多说话人标签由端侧频谱聚类生成（SDK 无官方 diarization）。手表录音同步到 iPhone 后自动转写。无云端 AI。")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

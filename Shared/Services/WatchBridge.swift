@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import WatchConnectivity
 
@@ -125,35 +126,64 @@ final class WatchBridge: NSObject, ObservableObject {
             try fm.removeItem(at: dest)
         }
         try fm.copyItem(at: sourceURL, to: dest)
+        try Self.validateAudioFile(at: dest)
         memo.recordingStatus = .completed
         if memo.sourceDevice.isEmpty { memo.sourceDevice = "Apple Watch" }
+        // Prefer actual duration from file if meta was incomplete.
+        if memo.duration < 0.05, let dur = Self.audioDuration(at: dest) {
+            memo.duration = dur
+        }
         MemoLibraryStore.shared.upsert(memo, preferIncomingIfNewer: false)
-        // Native Speech on iPhone after ingest.
         Task { await TranscriptionService.shared.transcribe(memoID: memoID) }
     }
 
     @MainActor
     func ingestBundle(metaJSON: String, audioBase64: String) throws {
         let memo = try ingestMetaJSON(metaJSON)
-        guard let audioData = Data(base64Encoded: audioBase64) else {
+        guard let audioData = Data(base64Encoded: audioBase64), !audioData.isEmpty else {
             throw BridgeError.badPayload
         }
         let dest = AudioFileStore.shared.audioURL(for: memo)
         AudioFileStore.shared.ensureDirectory(dest.deletingLastPathComponent())
         try audioData.write(to: dest, options: .atomic)
+        try Self.validateAudioFile(at: dest)
         var updated = memo
         updated.recordingStatus = .completed
+        if updated.duration < 0.05, let dur = Self.audioDuration(at: dest) {
+            updated.duration = dur
+        }
         MemoLibraryStore.shared.upsert(updated, preferIncomingIfNewer: false)
         Task { await TranscriptionService.shared.transcribe(memoID: memo.id) }
         lastTransferMessage = "已接收手表录音 \(memo.title)"
-        AppLogger.bridge.info("Ingested bundle \(memo.id.uuidString, privacy: .public)")
+        AppLogger.bridge.info("Ingested bundle \(memo.id.uuidString, privacy: .public) bytes=\(audioData.count)")
+    }
+
+    private static func validateAudioFile(at url: URL) throws {
+        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?.intValue ?? 0
+        guard size > 0 else { throw BridgeError.corruptAudio }
+        // Ensure AVFoundation can open it (guards truncated WC payloads).
+        _ = try AVAudioFile(forReading: url)
+    }
+
+    private static func audioDuration(at url: URL) -> TimeInterval? {
+        guard let file = try? AVAudioFile(forReading: url) else { return nil }
+        let frames = Double(file.length)
+        let rate = file.processingFormat.sampleRate
+        guard rate > 0 else { return nil }
+        return frames / rate
     }
     #endif
 }
 
 enum BridgeError: LocalizedError {
     case badPayload
-    var errorDescription: String? { "同步数据无效" }
+    case corruptAudio
+    var errorDescription: String? {
+        switch self {
+        case .badPayload: return "同步数据无效"
+        case .corruptAudio: return "手表音频损坏或不完整"
+        }
+    }
 }
 
 extension WatchBridge: WCSessionDelegate {

@@ -23,14 +23,7 @@ final class AudioPlayerService: NSObject, ObservableObject, AVAudioPlayerDelegat
             throw PlaybackError.fileMissing
         }
 
-        let session = AVAudioSession.sharedInstance()
-        #if os(watchOS)
-        // watchOS: playback category (not playAndRecord) so library items actually audible.
-        try session.setCategory(.playback, mode: .default)
-        #else
-        try session.setCategory(.playback, mode: .spokenAudio, options: [.defaultToSpeaker])
-        #endif
-        try session.setActive(true)
+        try AudioSessionCoordinator.activate(.playback)
 
         let player = try AVAudioPlayer(contentsOf: url)
         player.delegate = self
@@ -99,13 +92,7 @@ final class AudioPlayerService: NSObject, ObservableObject, AVAudioPlayerDelegat
                 lastError = "找不到音频文件"
                 throw PlaybackError.fileMissing
             }
-            let session = AVAudioSession.sharedInstance()
-            #if os(watchOS)
-            try session.setCategory(.playback, mode: .default)
-            #else
-            try session.setCategory(.playback, mode: .spokenAudio, options: [.defaultToSpeaker])
-            #endif
-            try session.setActive(true)
+            try AudioSessionCoordinator.activate(.playback)
             let player = try AVAudioPlayer(contentsOf: url)
             player.delegate = self
             player.prepareToPlay()

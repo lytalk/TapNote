@@ -34,6 +34,8 @@ struct MemoRecording: Identifiable, Codable, Equatable, Sendable {
     var recordingStatus: RecordingStatus
     var transcriptStatus: TranscriptStatus
     var transcriptText: String?
+    /// Speaker-labeled segments when diarization ran; optional for older memos.
+    var transcriptSegments: [TranscriptSegment]?
     var summaryStatus: SummaryStatus
     var summaryText: String?
     var updatedAt: Date
@@ -50,6 +52,7 @@ struct MemoRecording: Identifiable, Codable, Equatable, Sendable {
         recordingStatus: RecordingStatus = .recording,
         transcriptStatus: TranscriptStatus = .none,
         transcriptText: String? = nil,
+        transcriptSegments: [TranscriptSegment]? = nil,
         summaryStatus: SummaryStatus = .none,
         summaryText: String? = nil,
         updatedAt: Date = Date(),
@@ -64,11 +67,16 @@ struct MemoRecording: Identifiable, Codable, Equatable, Sendable {
         self.recordingStatus = recordingStatus
         self.transcriptStatus = transcriptStatus
         self.transcriptText = transcriptText
+        self.transcriptSegments = transcriptSegments
         self.summaryStatus = summaryStatus
         self.summaryText = summaryText
         self.updatedAt = updatedAt
         self.iCloudRecordID = iCloudRecordID ?? id.uuidString
         self.sourceDevice = sourceDevice
+    }
+
+    var speakerCount: Int {
+        Set(transcriptSegments?.map(\.speakerIndex) ?? []).count
     }
 
     mutating func touch() {

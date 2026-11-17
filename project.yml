@@ -58,6 +58,9 @@ targets:
       - path: Shared
         excludes:
           - Services/TranscriptionService.swift
+          - Services/SpeakerDiarizer.swift
+          - Services/SpeechReliabilityHarness.swift
+          - Services/AudioFormatPreparer.swift
           - Services/SummaryService.swift
           - Services/OpenAICompatibleClient.swift
           - Services/AudioTrimService.swift
