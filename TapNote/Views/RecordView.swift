@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RecordView: View {
     @EnvironmentObject private var library: MemoLibraryStore
@@ -6,6 +7,7 @@ struct RecordView: View {
     @EnvironmentObject private var deepLink: DeepLinkRouter
     @StateObject private var session = RecordingSession()
     @State private var errorText: String?
+    @State private var showMicSettingsHint = false
 
     var body: some View {
         NavigationStack {
@@ -34,6 +36,16 @@ struct RecordView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
+
+                if showMicSettingsHint {
+                    Button("打开设置，允许麦克风") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+
                 Spacer()
             }
             .navigationTitle("录音")
@@ -51,26 +63,37 @@ struct RecordView: View {
     private func consumeAutoRecordIfNeeded() async {
         guard deepLink.consumeAutoRecordIfNeeded() else { return }
         guard !session.isRecording else { return }
+        await startRecordingUI()
+    }
+
+    private func toggle() async {
+        if session.isRecording {
+            errorText = nil
+            showMicSettingsHint = false
+            do {
+                let (memo, _) = try await session.stop()
+                library.upsert(memo, preferIncomingIfNewer: false)
+                Task { await TranscriptionService.shared.transcribe(memoID: memo.id) }
+            } catch {
+                errorText = error.localizedDescription
+            }
+        } else {
+            await startRecordingUI()
+        }
+    }
+
+    private func startRecordingUI() async {
         errorText = nil
+        showMicSettingsHint = false
         do {
             _ = try await session.start()
         } catch {
             errorText = error.localizedDescription
-        }
-    }
-
-    private func toggle() async {
-        errorText = nil
-        do {
-            if session.isRecording {
-                let (memo, _) = try await session.stop()
-                library.upsert(memo, preferIncomingIfNewer: false)
-                Task { await TranscriptionService.shared.transcribe(memoID: memo.id) }
-            } else {
-                _ = try await session.start()
+            if case RecordingError.permissionDenied = error {
+                showMicSettingsHint = true
+            } else if !session.currentMicPermissionGranted() {
+                showMicSettingsHint = true
             }
-        } catch {
-            errorText = error.localizedDescription
         }
     }
 }

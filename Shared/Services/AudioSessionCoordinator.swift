@@ -15,24 +15,34 @@ enum AudioSessionCoordinator {
         switch purpose {
         case .record:
             #if os(watchOS)
-            try session.setCategory(.playAndRecord, mode: .default)
+            // watchOS: keep it simple — exotic Bluetooth options break record() on device.
+            try session.setCategory(.playAndRecord, mode: .default, options: [])
             #else
-            try session.setCategory(
-                .playAndRecord,
-                mode: .spokenAudio,
-                options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP]
-            )
+            // Avoid .allowBluetoothA2DP with playAndRecord (A2DP is output-only; can make record() return false).
+            // Prefer HFP when a headset mic is connected.
+            if #available(iOS 18.0, *) {
+                try session.setCategory(
+                    .playAndRecord,
+                    mode: .default,
+                    options: [.defaultToSpeaker, .allowBluetoothHFP]
+                )
+            } else {
+                try session.setCategory(
+                    .playAndRecord,
+                    mode: .default,
+                    options: [.defaultToSpeaker, .allowBluetooth]
+                )
+            }
             #endif
             try session.setActive(true, options: [])
         case .playback:
             #if os(watchOS)
             try session.setCategory(.playback, mode: .default)
             #else
-            try session.setCategory(.playback, mode: .spokenAudio, options: [.defaultToSpeaker])
+            try session.setCategory(.playback, mode: .default, options: [.defaultToSpeaker])
             #endif
             try session.setActive(true, options: [])
         case .speechAnalysis:
-            // SpeechAnalyzer / SFSpeech read files; avoid leftover playAndRecord / metering.
             #if os(iOS)
             try session.setCategory(.playback, mode: .measurement, options: [.mixWithOthers])
             try session.setActive(true, options: [])
@@ -40,6 +50,7 @@ enum AudioSessionCoordinator {
         }
     }
 
+    /// Prefer switching category without tearing the session down first (device race).
     static func deactivateGently() {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }

@@ -16,14 +16,8 @@ final class RecordingSession: NSObject, ObservableObject {
     private var wasInterrupted = false
     private let store = AudioFileStore.shared
 
-    /// Speech-friendly AAC: mono 16 kHz — smaller, stable for ASR / WC.
-    static let recordingSettings: [String: Any] = [
-        AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-        AVSampleRateKey: 16_000,
-        AVNumberOfChannelsKey: 1,
-        AVEncoderBitRateKey: 64_000,
-        AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-    ]
+    /// Prefer device-friendly rates first; 16 kHz last (some hardware rejects it with AAC bit-rate).
+    private static let candidateSampleRates: [Double] = [44_100, 48_000, 16_000]
 
     deinit {
         if let interruptionObserver {
@@ -31,8 +25,16 @@ final class RecordingSession: NSObject, ObservableObject {
         }
     }
 
+    func currentMicPermissionGranted() -> Bool {
+        if #available(iOS 17.0, watchOS 10.0, *) {
+            return AVAudioApplication.shared.recordPermission == .granted
+        }
+        return AVAudioSession.sharedInstance().recordPermission == .granted
+    }
+
     func requestPermission() async -> Bool {
-        await withCheckedContinuation { continuation in
+        if currentMicPermissionGranted() { return true }
+        return await withCheckedContinuation { continuation in
             if #available(iOS 17.0, watchOS 10.0, *) {
                 AVAudioApplication.requestRecordPermission { granted in
                     continuation.resume(returning: granted)
@@ -49,23 +51,60 @@ final class RecordingSession: NSObject, ObservableObject {
         guard !isRecording else {
             throw RecordingError.alreadyRecording
         }
+
         let granted = await requestPermission()
         guard granted else {
             throw RecordingError.permissionDenied
         }
 
-        AudioSessionCoordinator.deactivateGently()
-        try AudioSessionCoordinator.activate(.record)
+        // Activate record session without a hard deactivate first — tearing down then
+        // immediately recording races on physical devices and yields record() == false.
+        do {
+            try AudioSessionCoordinator.activate(.record)
+        } catch {
+            AppLogger.record.error("Audio session activate failed: \(error.localizedDescription)")
+            throw RecordingError.sessionFailed(error.localizedDescription)
+        }
+
+        // Brief settle so the route is ready (esp. after first permission grant).
+        try await Task.sleep(nanoseconds: 50_000_000)
+
         observeInterruptions()
 
         let id = UUID()
         let tempURL = store.temporaryRecordingURL(id: id)
+        store.ensureDirectory(tempURL.deletingLastPathComponent())
 
-        let recorder = try AVAudioRecorder(url: tempURL, settings: Self.recordingSettings)
-        recorder.isMeteringEnabled = true
-        recorder.prepareToRecord()
-        guard recorder.record() else {
-            throw RecordingError.failedToStart
+        var lastCreateError: Error?
+        var startedRecorder: AVAudioRecorder?
+
+        for rate in Self.candidateSampleRates {
+            let settings = Self.recordingSettings(sampleRate: rate)
+            do {
+                let candidate = try AVAudioRecorder(url: tempURL, settings: settings)
+                candidate.isMeteringEnabled = true
+                guard candidate.prepareToRecord() else {
+                    AppLogger.record.warning("prepareToRecord failed at \(rate) Hz")
+                    continue
+                }
+                if candidate.record() {
+                    startedRecorder = candidate
+                    AppLogger.record.info("AVAudioRecorder started at \(rate) Hz")
+                    break
+                } else {
+                    AppLogger.record.warning("record() returned false at \(rate) Hz")
+                    candidate.stop()
+                }
+            } catch {
+                lastCreateError = error
+                AppLogger.record.warning("AVAudioRecorder init failed at \(rate) Hz: \(error.localizedDescription)")
+            }
+        }
+
+        guard let recorder = startedRecorder else {
+            let detail = lastCreateError?.localizedDescription
+                ?? "AVAudioRecorder.record() 返回 false（请检查麦克风权限与其他占用麦克风的 App）"
+            throw RecordingError.failedToStart(detail)
         }
 
         self.recorder = recorder
@@ -86,7 +125,7 @@ final class RecordingSession: NSObject, ObservableObject {
             }
         }
 
-        AppLogger.record.info("Started recording \(id.uuidString, privacy: .public) 16k mono AAC")
+        AppLogger.record.info("Started recording \(id.uuidString, privacy: .public)")
         return MemoRecording(id: id, recordingStatus: .recording)
     }
 
@@ -102,7 +141,6 @@ final class RecordingSession: NSObject, ObservableObject {
         isRecording = false
         elapsed = duration
 
-        // Flush file to disk before Speech / WC reads it.
         try await Task.sleep(nanoseconds: 80_000_000)
 
         guard FileManager.default.fileExists(atPath: tempURL.path),
@@ -111,7 +149,6 @@ final class RecordingSession: NSObject, ObservableObject {
             throw RecordingError.emptyFile
         }
 
-        // Validate decodable by AVAudioFile.
         do {
             _ = try AVAudioFile(forReading: tempURL)
         } catch {
@@ -133,7 +170,7 @@ final class RecordingSession: NSObject, ObservableObject {
         self.startedAt = nil
 
         AudioSessionCoordinator.deactivateGently()
-        AppLogger.record.info("Stopped recording \(id.uuidString, privacy: .public) duration=\(duration) path=\(dest.lastPathComponent, privacy: .public)")
+        AppLogger.record.info("Stopped recording \(id.uuidString, privacy: .public) duration=\(duration)")
         return (memo, dest)
     }
 
@@ -157,6 +194,16 @@ final class RecordingSession: NSObject, ObservableObject {
         } catch {
             lastError = "无法从中断恢复：\(error.localizedDescription)"
         }
+    }
+
+    private static func recordingSettings(sampleRate: Double) -> [String: Any] {
+        // Omit AVEncoderBitRateKey — fixed bitrates + uncommon sample rates fail on some devices.
+        [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: sampleRate,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
     }
 
     private func observeInterruptions() {
@@ -193,7 +240,8 @@ enum RecordingError: LocalizedError {
     case alreadyRecording
     case notRecording
     case permissionDenied
-    case failedToStart
+    case failedToStart(String)
+    case sessionFailed(String)
     case emptyFile
     case corruptFile
 
@@ -201,8 +249,12 @@ enum RecordingError: LocalizedError {
         switch self {
         case .alreadyRecording: return "已在录音中"
         case .notRecording: return "当前没有进行中的录音"
-        case .permissionDenied: return "需要麦克风权限才能录音"
-        case .failedToStart: return "无法开始录音"
+        case .permissionDenied:
+            return "需要麦克风权限才能录音。请到：设置 → TapNote → 麦克风 → 打开"
+        case .failedToStart(let detail):
+            return "无法开始录音：\(detail)"
+        case .sessionFailed(let detail):
+            return "音频会话失败：\(detail)"
         case .emptyFile: return "录音文件为空"
         case .corruptFile: return "录音文件损坏，无法读取"
         }
