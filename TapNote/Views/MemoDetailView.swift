@@ -5,7 +5,8 @@ struct MemoDetailView: View {
 
     @EnvironmentObject private var library: MemoLibraryStore
     @EnvironmentObject private var player: AudioPlayerService
-    @StateObject private var transcription = TranscriptionService.shared
+    /// Shared singleton — use ObservedObject (StateObject ownership is wrong here).
+    @ObservedObject private var transcription = TranscriptionService.shared
     @State private var showTrim = false
     @State private var shareItems: [Any] = []
     @State private var showShare = false
@@ -48,7 +49,12 @@ struct MemoDetailView: View {
             }
 
             Section {
-                if memo.transcriptStatus == .completed {
+                if transcription.isTranscribing {
+                    ProgressView(transcription.progressText ?? "转写中…")
+                    Button("取消转写", role: .cancel) {
+                        transcription.cancel()
+                    }
+                } else if memo.transcriptStatus == .completed {
                     if let segments = memo.transcriptSegments, !segments.isEmpty {
                         ForEach(segments) { segment in
                             VStack(alignment: .leading, spacing: 6) {
@@ -75,11 +81,13 @@ struct MemoDetailView: View {
                         Text(text)
                             .textSelection(.enabled)
                     }
-                } else if memo.transcriptStatus == .processing || transcription.isTranscribing {
-                    ProgressView(transcription.progressText ?? "转写中…")
                 } else if memo.transcriptStatus == .failed {
                     Text(memo.transcriptText ?? "转写失败")
                         .foregroundStyle(.red)
+                } else if memo.transcriptStatus == .processing {
+                    // Stale processing without an active job — offer retry instead of spinning forever.
+                    Text("转写中断，请重试")
+                        .foregroundStyle(.secondary)
                 } else {
                     Text("尚未转写")
                         .foregroundStyle(.secondary)

@@ -16,6 +16,7 @@ final class TranscriptionService: ObservableObject {
     private var queue: [UUID] = []
     private var running = false
     private var activeLegacyTask: SFSpeechRecognitionTask?
+    private var cancelRequested = false
 
     #if canImport(Speech) && os(iOS)
 
@@ -27,7 +28,18 @@ final class TranscriptionService: ObservableObject {
         }
     }
 
+    func cancel() {
+        cancelRequested = true
+        queue.removeAll()
+        activeLegacyTask?.cancel()
+        activeLegacyTask = nil
+        progressText = "已取消"
+        isTranscribing = false
+        AppLogger.speech.info("Transcription cancelled by user")
+    }
+
     func transcribe(memoID: UUID) async {
+        cancelRequested = false
         queue.append(memoID)
         await drainQueue()
     }
@@ -35,26 +47,31 @@ final class TranscriptionService: ObservableObject {
     private func drainQueue() async {
         guard !running else { return }
         running = true
-        defer { running = false }
-        while let id = queue.first {
-            queue.removeFirst()
-            await performTranscription(memoID: id)
+        isTranscribing = true
+        defer {
+            running = false
+            isTranscribing = false
+            progressText = nil
+            activeLegacyTask?.cancel()
+            activeLegacyTask = nil
         }
-        // Jobs enqueued while the last item ran.
-        if !queue.isEmpty {
-            await drainQueue()
+        while !queue.isEmpty {
+            if cancelRequested {
+                queue.removeAll()
+                break
+            }
+            let id = queue.removeFirst()
+            await performTranscription(memoID: id)
         }
     }
 
     private func performTranscription(memoID: UUID) async {
         guard var memo = MemoLibraryStore.shared.memo(id: memoID) else { return }
-        isTranscribing = true
         progressText = "准备转写…"
         memo.transcriptStatus = .processing
         MemoLibraryStore.shared.save(memo)
+
         defer {
-            isTranscribing = false
-            progressText = nil
             activeLegacyTask?.cancel()
             activeLegacyTask = nil
         }
@@ -69,6 +86,7 @@ final class TranscriptionService: ObservableObject {
             fail(memoID, "未授权语音识别，请在设置中开启。")
             return
         }
+        if cancelRequested { return }
 
         let url = AudioFileStore.shared.audioURL(for: memo)
         try? FileManager.default.startDownloadingUbiquitousItem(at: url)
@@ -79,12 +97,16 @@ final class TranscriptionService: ObservableObject {
 
         // File-based recognition is happier with a quiet session (no leftover playAndRecord).
         AudioSessionCoordinator.deactivateGently()
-        try? await Task.sleep(nanoseconds: 200_000_000)
+        try? await Task.sleep(nanoseconds: 150_000_000)
+        if cancelRequested { return }
 
         let speechURL: URL
         do {
             progressText = "转换音频格式…"
-            speechURL = try AudioFormatPreparer.pcmCAFForSpeech(from: url)
+            // Heavy AVAudioConverter work off the main actor so UI stays responsive.
+            speechURL = try await Task.detached(priority: .userInitiated) {
+                try AudioFormatPreparer.pcmCAFForSpeech(from: url)
+            }.value
         } catch {
             AppLogger.speech.warning("PCM prepare failed, using original: \(error.localizedDescription)")
             speechURL = url
@@ -95,82 +117,136 @@ final class TranscriptionService: ObservableObject {
             }
         }
 
-        var lastError: Error?
-        for attempt in 1...2 {
-            progressText = attempt == 1 ? "转写中…" : "整轮重试…"
-            do {
-                let result = try await recognizeWithBestEngine(url: speechURL)
-                var updated = MemoLibraryStore.shared.memo(id: memoID) ?? memo
-                updated.transcriptStatus = .completed
-                updated.transcriptSegments = result.segments
-                updated.transcriptText = result.displayText
-                updated.touch()
-                MemoLibraryStore.shared.save(updated)
-                AppLogger.speech.info(
-                    "Transcribed \(memoID.uuidString, privacy: .public) engine=\(result.engine, privacy: .public) speakers=\(result.segments.map(\.speakerIndex).max().map { $0 + 1 } ?? 0) attempt=\(attempt)"
-                )
-                AudioSessionCoordinator.deactivateGently()
-                return
-            } catch {
-                lastError = error
-                AppLogger.speech.error("Attempt \(attempt) failed: \(error.localizedDescription)")
-                activeLegacyTask?.cancel()
-                activeLegacyTask = nil
-                // Internal engine chain already exhausted fallbacks; only one quick retry.
-                if attempt == 1 {
-                    try? await Task.sleep(nanoseconds: 300_000_000)
-                }
+        progressText = "转写中…"
+        do {
+            let result = try await recognizeWithBestEngine(url: speechURL)
+            if cancelRequested { return }
+            var updated = MemoLibraryStore.shared.memo(id: memoID) ?? memo
+            updated.transcriptStatus = .completed
+            updated.transcriptSegments = result.segments
+            updated.transcriptText = result.displayText
+            updated.touch()
+            MemoLibraryStore.shared.save(updated)
+            AppLogger.speech.info(
+                "Transcribed \(memoID.uuidString, privacy: .public) engine=\(result.engine, privacy: .public) speakers=\(result.segments.map(\.speakerIndex).max().map { $0 + 1 } ?? 0)"
+            )
+        } catch is CancellationError {
+            AppLogger.speech.info("Transcription cancelled for \(memoID.uuidString, privacy: .public)")
+            if var current = MemoLibraryStore.shared.memo(id: memoID), current.transcriptStatus == .processing {
+                current.transcriptStatus = .failed
+                current.transcriptText = "已取消转写"
+                current.touch()
+                MemoLibraryStore.shared.save(current)
             }
+        } catch {
+            let message: String
+            if let te = error as? TranscriptionError {
+                message = te.errorDescription ?? te.localizedDescription
+            } else {
+                message = "转写失败：\(error.localizedDescription)"
+            }
+            fail(memoID, message)
+            AppLogger.speech.error("Transcription failed: \(message, privacy: .public)")
         }
 
-        fail(memoID, "转写失败：\(lastError?.localizedDescription ?? "未知错误")")
         AudioSessionCoordinator.deactivateGently()
     }
 
-    private struct RecognizeResult {
+    private struct RecognizeResult: Sendable {
         var displayText: String
         var segments: [TranscriptSegment]
         var engine: String
     }
 
     private func recognizeWithBestEngine(url: URL) async throws -> RecognizeResult {
+        if cancelRequested { throw CancellationError() }
+
         if #available(iOS 26.0, *) {
             #if !targetEnvironment(simulator)
             if SpeechTranscriber.isAvailable {
                 do {
-                    return try await recognizeWithSpeechAnalyzer(url: url, useDictation: false)
+                    return try await withTimeout(seconds: 40) {
+                        try await self.recognizeWithSpeechAnalyzer(url: url, useDictation: false)
+                    }
+                } catch let error as TranscriptionError where error == .emptyResult {
+                    // Silence / no speech — skip DictationTranscriber (same empty outcome) and try SFSpeech once.
+                    AppLogger.speech.warning("SpeechTranscriber empty; trying SFSpeech once")
+                } catch is CancellationError {
+                    throw CancellationError()
                 } catch {
                     AppLogger.speech.warning("SpeechTranscriber failed: \(error.localizedDescription)")
+                    do {
+                        return try await withTimeout(seconds: 40) {
+                            try await self.recognizeWithSpeechAnalyzer(url: url, useDictation: true)
+                        }
+                    } catch let error as TranscriptionError where error == .emptyResult {
+                        AppLogger.speech.warning("DictationTranscriber empty; trying SFSpeech once")
+                    } catch is CancellationError {
+                        throw CancellationError()
+                    } catch {
+                        AppLogger.speech.warning("DictationTranscriber failed: \(error.localizedDescription)")
+                    }
                 }
-            }
-            do {
-                return try await recognizeWithSpeechAnalyzer(url: url, useDictation: true)
-            } catch {
-                AppLogger.speech.warning("DictationTranscriber failed: \(error.localizedDescription)")
+            } else {
+                do {
+                    return try await withTimeout(seconds: 40) {
+                        try await self.recognizeWithSpeechAnalyzer(url: url, useDictation: true)
+                    }
+                } catch let error as TranscriptionError where error == .emptyResult {
+                    AppLogger.speech.warning("DictationTranscriber empty; trying SFSpeech once")
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    AppLogger.speech.warning("DictationTranscriber failed: \(error.localizedDescription)")
+                }
             }
             #else
             AppLogger.speech.warning("Skipping SpeechAnalyzer on Simulator (models typically missing)")
             #endif
         }
+
         #if targetEnvironment(simulator)
-        // iOS 27.2 Simulator: SpeechTranscriber models missing; zh-CN on-device mini.json corrupt;
-        // SFSpeechURLRecognitionRequest can block the main thread indefinitely during init.
-        // Fail fast so UI/tests stay responsive. Full SFSpeech chain runs on device builds.
         AppLogger.speech.error("Simulator Speech backend unavailable — use a physical iPhone with Speech models installed")
         throw TranscriptionError.simulatorSpeechUnavailable
         #else
+        // Single SFSpeech attempt with hard timeout — never leave UI spinning after empty speech.
         do {
-            return try await recognizeWithSFSpeech(url: url, onDevice: true, preferBuffer: true)
+            return try await withTimeout(seconds: 25) {
+                try await self.recognizeWithSFSpeech(url: url, onDevice: true, preferBuffer: true)
+            }
+        } catch let error as TranscriptionError where error == .emptyResult {
+            throw error
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
-            AppLogger.speech.warning("SFSpeech on-device failed: \(error.localizedDescription); trying server buffer")
+            AppLogger.speech.warning("SFSpeech on-device failed: \(error.localizedDescription); trying server")
         }
-        do {
-            return try await recognizeWithSFSpeech(url: url, onDevice: false, preferBuffer: true)
-        } catch {
-            AppLogger.speech.warning("SFSpeech buffer/server failed: \(error.localizedDescription); trying URL request")
-            return try await recognizeWithSFSpeech(url: url, onDevice: false, preferBuffer: false)
+        return try await withTimeout(seconds: 25) {
+            try await self.recognizeWithSFSpeech(url: url, onDevice: false, preferBuffer: true)
         }
         #endif
+    }
+
+    // MARK: - Timeout helper
+
+    private func withTimeout<T: Sendable>(
+        seconds: TimeInterval,
+        operation: @escaping @MainActor () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { @MainActor in
+                try await operation()
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                throw TranscriptionError.timeout
+            }
+            guard let value = try await group.next() else {
+                throw TranscriptionError.timeout
+            }
+            group.cancelAll()
+            return value
+        }
     }
 
     // MARK: - SpeechAnalyzer (iOS 26+)
@@ -236,6 +312,7 @@ final class TranscriptionService: ObservableObject {
             var utterances: [SpeakerDiarizer.TimedUtterance] = []
             if let transcriber = module as? SpeechTranscriber {
                 for try await result in transcriber.results {
+                    try Task.checkCancellation()
                     guard result.isFinal else { continue }
                     let text = String(result.text.characters).trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !text.isEmpty else { continue }
@@ -245,6 +322,7 @@ final class TranscriptionService: ObservableObject {
                 }
             } else if let dictation = module as? DictationTranscriber {
                 for try await result in dictation.results {
+                    try Task.checkCancellation()
                     guard result.isFinal else { continue }
                     let text = String(result.text.characters).trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !text.isEmpty else { continue }
@@ -256,33 +334,41 @@ final class TranscriptionService: ObservableObject {
             return utterances
         }
 
-        // iOS 27+: auto-convert file audio into analyzer-compatible inputs.
-        let asset = AVURLAsset(url: url)
-        let lastTime: CMTime?
-        if #available(iOS 27.0, *) {
-            let provider = try await AssetInputSequenceProvider.provider(
-                from: asset,
-                compatibleWith: [module]
-            )
-            lastTime = try await analyzer.analyzeSequence(provider.analyzerInputs)
-        } else {
-            let audioFile = try AVAudioFile(forReading: url)
-            lastTime = try await analyzer.analyzeSequence(from: audioFile)
-        }
-        if let lastTime {
-            try await analyzer.finalizeAndFinish(through: lastTime)
-        } else {
-            try await analyzer.finalizeAndFinishThroughEndOfInput()
-        }
+        do {
+            let asset = AVURLAsset(url: url)
+            let lastTime: CMTime?
+            if #available(iOS 27.0, *) {
+                let provider = try await AssetInputSequenceProvider.provider(
+                    from: asset,
+                    compatibleWith: [module]
+                )
+                lastTime = try await analyzer.analyzeSequence(provider.analyzerInputs)
+            } else {
+                let audioFile = try AVAudioFile(forReading: url)
+                lastTime = try await analyzer.analyzeSequence(from: audioFile)
+            }
+            if let lastTime {
+                try await analyzer.finalizeAndFinish(through: lastTime)
+            } else {
+                try await analyzer.finalizeAndFinishThroughEndOfInput()
+            }
 
-        let utterances = try await collectTask.value
-        guard !utterances.isEmpty else {
-            throw TranscriptionError.emptyResult
-        }
+            let utterances = try await collectTask.value
+            guard !utterances.isEmpty else {
+                throw TranscriptionError.emptyResult
+            }
 
-        let segments = try SpeakerDiarizer.diarize(audioURL: url, utterances: utterances)
-        let display = SpeakerDiarizer.formattedTranscript(from: segments)
-        return RecognizeResult(displayText: display, segments: segments, engine: engineName)
+            let segments = try await Task.detached(priority: .userInitiated) {
+                try SpeakerDiarizer.diarize(audioURL: url, utterances: utterances)
+            }.value
+            let display = SpeakerDiarizer.formattedTranscript(from: segments)
+            return RecognizeResult(displayText: display, segments: segments, engine: engineName)
+        } catch {
+            collectTask.cancel()
+            // Best-effort stop so the next engine / retry does not stall on a live analyzer.
+            try? await analyzer.finalizeAndFinishThroughEndOfInput()
+            throw error
+        }
     }
 
     // MARK: - Legacy SFSpeechRecognizer (fallback)
@@ -303,7 +389,9 @@ final class TranscriptionService: ObservableObject {
             throw TranscriptionError.unavailable
         }
 
-        let wavURL = (try? AudioFormatPreparer.pcmWAVForSFSpeech(from: url)) ?? url
+        let wavURL = try await Task.detached(priority: .userInitiated) {
+            (try? AudioFormatPreparer.pcmWAVForSFSpeech(from: url)) ?? url
+        }.value
         defer {
             if wavURL != url { try? FileManager.default.removeItem(at: wavURL) }
         }
@@ -327,6 +415,11 @@ final class TranscriptionService: ObservableObject {
             )
         }
 
+        let trimmed = transcription.formattedString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw TranscriptionError.emptyResult
+        }
+
         let utterances: [SpeakerDiarizer.TimedUtterance] = transcription.segments.map { seg in
             SpeakerDiarizer.TimedUtterance(
                 start: seg.timestamp,
@@ -338,7 +431,9 @@ final class TranscriptionService: ObservableObject {
         let grouped = groupByPause(utterances, pause: 0.55)
         let segments: [TranscriptSegment]
         if grouped.count >= 2 {
-            segments = (try? SpeakerDiarizer.diarize(audioURL: url, utterances: grouped))
+            segments = (try? await Task.detached {
+                try SpeakerDiarizer.diarize(audioURL: url, utterances: grouped)
+            }.value)
                 ?? grouped.map {
                     TranscriptSegment(speakerIndex: 0, startTime: $0.start, endTime: $0.end, text: $0.text)
                 }
@@ -348,14 +443,14 @@ final class TranscriptionService: ObservableObject {
                     speakerIndex: 0,
                     startTime: 0,
                     endTime: grouped.last?.end ?? 0,
-                    text: transcription.formattedString
+                    text: trimmed
                 )
             ]
         }
 
         let display = segments.count > 1
             ? SpeakerDiarizer.formattedTranscript(from: segments)
-            : (segments.first?.text ?? transcription.formattedString)
+            : (segments.first?.text ?? trimmed)
         let engine = "SFSpeech-\(onDevice ? "onDevice" : "server")-\(preferBuffer ? "buffer" : "url")"
         return RecognizeResult(displayText: display, segments: segments, engine: engine)
     }
@@ -369,12 +464,7 @@ final class TranscriptionService: ObservableObject {
         request.shouldReportPartialResults = false
         request.taskHint = .dictation
         request.requiresOnDeviceRecognition = onDevice
-        #if targetEnvironment(simulator)
-        let timeout: TimeInterval = 12
-        #else
-        let timeout: TimeInterval = 18
-        #endif
-        return try await runSFSpeech(recognizer: recognizer, request: request, timeout: timeout)
+        return try await runSFSpeech(recognizer: recognizer, request: request, timeout: 18)
     }
 
     private func recognizeSFSpeechBuffer(
@@ -387,55 +477,56 @@ final class TranscriptionService: ObservableObject {
         request.taskHint = .dictation
         request.requiresOnDeviceRecognition = onDevice
 
-        let file = try AVAudioFile(forReading: wavURL)
-        let format = file.processingFormat
-        let capacity: AVAudioFrameCount = 4096
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: capacity) else {
-            throw TranscriptionError.unavailable
-        }
+        // Feed audio off the main actor — long files previously froze the UI here.
+        let buffers: [AVAudioPCMBuffer] = try await Task.detached(priority: .userInitiated) {
+            let file = try AVAudioFile(forReading: wavURL)
+            let format = file.processingFormat
+            let capacity: AVAudioFrameCount = 4096
+            var out: [AVAudioPCMBuffer] = []
+            while file.framePosition < file.length {
+                guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: capacity) else { break }
+                let remaining = AVAudioFrameCount(file.length - file.framePosition)
+                buffer.frameLength = min(capacity, remaining)
+                try file.read(into: buffer)
+                out.append(buffer)
+            }
+            return out
+        }.value
 
-        // CRITICAL: feed all buffers inside the continuation setup (synchronously)
-        // before awaiting — otherwise @MainActor deadlocks waiting for results
-        // that never arrive because append never runs.
+        guard !buffers.isEmpty else { throw TranscriptionError.unavailable }
+
         return try await withCheckedThrowingContinuation { continuation in
             var finished = false
-            let timeoutWork = DispatchWorkItem {
+            let finish: (Result<SFTranscription, Error>) -> Void = { result in
                 guard !finished else { return }
                 finished = true
+                continuation.resume(with: result)
+            }
+
+            let timeoutWork = DispatchWorkItem {
                 self.activeLegacyTask?.cancel()
                 self.activeLegacyTask = nil
-                continuation.resume(throwing: TranscriptionError.timeout)
+                finish(.failure(TranscriptionError.timeout))
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 22, execute: timeoutWork)
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 22, execute: timeoutWork)
 
             let task = recognizer.recognitionTask(with: request) { result, error in
-                guard !finished else { return }
                 if let error {
-                    finished = true
                     timeoutWork.cancel()
-                    continuation.resume(throwing: error)
+                    finish(.failure(error))
                     return
                 }
                 guard let result, result.isFinal else { return }
-                finished = true
                 timeoutWork.cancel()
-                continuation.resume(returning: result.bestTranscription)
+                finish(.success(result.bestTranscription))
             }
             self.activeLegacyTask = task
 
-            do {
-                while file.framePosition < file.length {
-                    let remaining = AVAudioFrameCount(file.length - file.framePosition)
-                    buffer.frameLength = min(capacity, remaining)
-                    try file.read(into: buffer)
+            DispatchQueue.global(qos: .userInitiated).async {
+                for buffer in buffers {
                     request.append(buffer)
                 }
                 request.endAudio()
-            } catch {
-                finished = true
-                timeoutWork.cancel()
-                task.cancel()
-                continuation.resume(throwing: error)
             }
         }
     }
@@ -447,27 +538,28 @@ final class TranscriptionService: ObservableObject {
     ) async throws -> SFTranscription {
         try await withCheckedThrowingContinuation { continuation in
             var finished = false
-            let timeoutWork = DispatchWorkItem {
+            let finish: (Result<SFTranscription, Error>) -> Void = { result in
                 guard !finished else { return }
                 finished = true
+                continuation.resume(with: result)
+            }
+
+            let timeoutWork = DispatchWorkItem {
                 self.activeLegacyTask?.cancel()
                 self.activeLegacyTask = nil
-                continuation.resume(throwing: TranscriptionError.timeout)
+                finish(.failure(TranscriptionError.timeout))
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
 
             let task = recognizer.recognitionTask(with: request) { result, error in
-                guard !finished else { return }
                 if let error {
-                    finished = true
                     timeoutWork.cancel()
-                    continuation.resume(throwing: error)
+                    finish(.failure(error))
                     return
                 }
                 guard let result, result.isFinal else { return }
-                finished = true
                 timeoutWork.cancel()
-                continuation.resume(returning: result.bestTranscription)
+                finish(.success(result.bestTranscription))
             }
             self.activeLegacyTask = task
         }
@@ -507,10 +599,12 @@ final class TranscriptionService: ObservableObject {
     func transcribe(memoID: UUID) async {
         AppLogger.speech.warning("Speech unavailable on this platform; skip \(memoID.uuidString, privacy: .public)")
     }
+
+    func cancel() {}
     #endif
 }
 
-enum TranscriptionError: LocalizedError {
+enum TranscriptionError: LocalizedError, Equatable {
     case unsupportedLocale
     case unavailable
     case emptyResult
@@ -522,7 +616,7 @@ enum TranscriptionError: LocalizedError {
         case .unsupportedLocale: return "当前语言不受 Speech 支持"
         case .unavailable: return "当前设备无法使用语音识别"
         case .emptyResult: return "未识别到有效语音内容"
-        case .timeout: return "转写超时"
+        case .timeout: return "转写超时，请重试（勿连续猛点）"
         case .simulatorSpeechUnavailable:
             return "模拟器 Speech 后端不可用（模型未装/zh-CN 资产损坏）。请在真机验证转写；多说话人聚类可在模拟器单独验证。"
         }
