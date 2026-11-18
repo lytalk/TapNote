@@ -567,7 +567,8 @@
 				INFOPLIST_FILE = TapNoteWatch/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp;
 				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
+				SKIP_INSTALL = NO;
+				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
@@ -648,7 +649,8 @@
 				INFOPLIST_FILE = TapNoteWatch/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lytalk.TapNote.watchkitapp;
 				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
+				SKIP_INSTALL = NO;
+				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;

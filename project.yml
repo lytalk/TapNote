@@ -65,7 +65,11 @@ targets:
         INFOPLIST_FILE: TapNoteWatch/Info.plist
         CODE_SIGN_ENTITLEMENTS: TapNoteWatch/TapNoteWatch.entitlements
         GENERATE_INFOPLIST_FILE: false
-        SKIP_INSTALL: true
+        # false so Scheme TapNoteWatch can install/run on a physical Watch destination.
+        # Companion embed into TapNote still works via Embed Watch Content.
+        SKIP_INSTALL: false
+        TARGETED_DEVICE_FAMILY: "4"
+        SUPPORTS_MACCATALYST: false
     entitlements:
       path: TapNoteWatch/TapNoteWatch.entitlements
     dependencies:
@@ -115,3 +119,15 @@ schemes:
     run:
       config: Debug
       executable: TapNote
+  # Watch-only runnable. Selecting a Watch destination under scheme TapNote
+  # (iOS executable) shows “doesn't support this platform / 不支持该平台”.
+  TapNoteWatch:
+    build:
+      targets:
+        TapNoteWatch: all
+        TapNoteWatchWidgets: all
+        # Build companion iOS app too so pairing/install path stays consistent.
+        TapNote: all
+    run:
+      config: Debug
+      executable: TapNoteWatch
