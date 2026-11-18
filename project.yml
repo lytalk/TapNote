@@ -28,15 +28,10 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: false
         GENERATE_INFOPLIST_FILE: false
+    # Personal Team (free Apple ID) cannot provision iCloud. Keep empty entitlements for device install.
+    # Re-add Cloud Documents when using a paid Apple Developer Program team.
     entitlements:
       path: TapNote/TapNote.entitlements
-      properties:
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.lytalk.TapNote
-        com.apple.developer.ubiquity-container-identifiers:
-          - iCloud.com.lytalk.TapNote
-        com.apple.developer.icloud-services:
-          - CloudDocuments
     dependencies:
       - target: TapNoteWatch
     info:
@@ -73,13 +68,6 @@ targets:
         SKIP_INSTALL: true
     entitlements:
       path: TapNoteWatch/TapNoteWatch.entitlements
-      properties:
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.lytalk.TapNote
-        com.apple.developer.ubiquity-container-identifiers:
-          - iCloud.com.lytalk.TapNote
-        com.apple.developer.icloud-services:
-          - CloudDocuments
     dependencies:
       - target: TapNoteWatchWidgets
     info:
